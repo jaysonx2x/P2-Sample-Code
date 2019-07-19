@@ -1,0 +1,72 @@
+function doSaveAgencyPatient(){
+    
+    fnShowAJAXLoader('save');
+    
+    var medicalRecordID = (is_medical_rec_exists) ? '(*_*)' : $('#patient_medical_rec_id').val();
+    
+    $.ajax({
+        type: 'POST',
+        url: NIX_SITE_URL + 'patients/save_patient_basic_info',
+        dataType: 'json',
+        data: { 
+            patient: {
+                MEDICAL_REC_ID  : medicalRecordID,
+                FIRSTNAME       : $('#patient_firstname').val(),
+                MIDDLE_INITIAL  : $('#patient_middle_initial').val(),
+                LASTNAME        : $('#patient_lastname').val(),
+                DOB             : $('#patient_birth_date').val(),
+                GENDER          : $('#patient_gender :selected').val()
+            },
+            patient_cont: {
+                PHONE_HOME14     : $('#patient_phone').val(),
+                ADDRESS114       : $('#patient_address').val(),
+                CITY14           : $('#CITY').val(),
+                STATE14          : $('#STATE').val(),
+                ZIPCODE14        : $('#ZIPCODE').val()
+            },
+            patient_cont_person: {
+                CONTACT_PERSON1   : $('#patient_contact_person').val(),
+                CONTACT_RELATION1 : $('#patient_contact_relation').val(),
+                PHONE_HOME1       : $('#patient_contact_phone').val()
+            }
+        }
+    })
+    .done(function(msg) {
+        
+        if(msg.patient_id) {
+            
+            fnAlertInfo('#notify', 'New patient added sucessfully.');
+    
+            is_medical_rec_exists = false;
+            
+            if($('#is_assign_patient').prop('checked')){
+                
+                var patient_name    = fnFormatName($('#patient_firstname').val(), $('#patient_lastname').val(), $('#patient_middle_initial').val(), 'fml');
+                var patient_address = fnFormatAddress($('#patient_address').val(), $('#CITY').val(), $('#STATE').val(), $('#ZIPCODE').val());
+                
+                $("#AGENCY_NAME").val(msg.agency_rec.AGENCY_NAME);
+                $("#AGENCY_PATIENTS_ID").val(msg.patient_id);
+                $("#PATIENT_NAME").val(patient_name);
+                
+                $("#BIRTH_DATE").val($('#patient_birth_date').val());
+                $("#AGE").val(fnGetAge($('#patient_birth_date').val()));
+                $("#GENDER").val(($('#patient_gender :selected').val() === '1') ? 'Male' : 'Female');
+                
+                $("#PATIENT_TELEPHONE").val($('#patient_phone').val());
+                $("#ADDRESS").val(patient_address);
+                
+                $("#CONTACT_PERSON").val($('#patient_contact_person').val());
+                $("#RELATIONSHIP").val($('#patient_contact_relation').val());
+                $("#CONTACT_PHONE").val($('#patient_contact_phone').val());
+                
+            }
+            
+            $("#patient_quick_entry_container").dialog("close");
+    
+        } else { fnAlertError('#notify', msg.errors); }
+
+        fnHideAJAXLoader();
+
+    });
+        
+}
