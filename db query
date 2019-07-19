@@ -1,0 +1,12 @@
+public function get_info_agency($agency_id=0)
+{
+    if($agency_id === 0) { return FALSE; }
+
+    $this->db
+        ->select('a.*, cr_u.USERNAME as UCREATOR, mod_u.USERNAME as UMODIFIER')
+        ->from($this->_table . ' a')
+        ->join('USERS cr_u',        'a.CREATED_BY = cr_u.ID')
+        ->join('USERS mod_u',       'a.MODIFIED_BY = mod_u.ID');
+
+    return $this->get_by(array('a.ID =' => intval($agency_id)));
+}
