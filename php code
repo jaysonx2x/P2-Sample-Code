@@ -1,0 +1,51 @@
+public function save_tech_support()
+    {
+        $user_id = $this->input->post('USER_ID');
+        $is_passw_edited = $this->input->post('IS_PASSW_EDITED');
+        
+        if (intval($user_id)>0)
+        {
+            $this->current_user_name = $this->user->get_info_user($user_id)->USERNAME;
+        }
+
+        $validated_user             = $this->user->validate_user($user_id, $is_passw_edited);
+        $validated_profile          = $this->profile->validate_profile(PROFILE_STAFF);
+        
+        $result = FALSE;
+        
+        if($validated_user and $validated_profile)
+        {
+            $result = $this->profile->add_edit_profile();
+            
+            if($result)
+            {
+                $_POST['PROFILE_TYPE']  = PROFILE_STAFF;
+                $_POST['USER_ID']       = nix_encode($this->input->post('USER_ID'), NIX_COUNT_3);
+                $_POST['PROFILES_ID']   = nix_encode($result, NIX_COUNT_3);
+                $_POST['USER_GROUPS_ID']= USER_GRP_TECHSUPP;
+                
+                $this->user->add_edit_user($is_passw_edited);
+            }
+            
+        }
+        
+            
+        $btn_add_url = base_url('administration/technical_support_form');
+        $btn_add_label = '<i class="glyphicon glyphicon-plus"></i> Add more Technical Support Personnel Users';
+
+        $btn_show_url = base_url('administration');
+        $btn_show_label = '<i class="glyphicon glyphicon-list"></i> Show Technical Support Personnel list';
+            
+
+        
+        $data = nix_encode($btn_add_url . ',' . $btn_add_label . ',' .
+                $btn_show_url . ',' . $btn_show_label, NIX_COUNT_3);
+        
+        if($result)
+        {
+            redirect(base_url('sysmessage/index/'.$data));
+        }else{
+            $this->technical_support_form();
+        }
+        
+    }
